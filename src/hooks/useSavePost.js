@@ -7,7 +7,15 @@ export default function useSavePost() {
       axios.patch(`/api/posts/${values.id}`, values).then((res) => res.data),
     {
       onSuccess: (data, values) => {
-        queryCache.invalidateQueries(['posts', data.id])
+        queryCache.setQueryData(['posts', data.id], data)
+        queryCache.setQueryData('posts', (old) => {
+          return old.map((d) => {
+            if (d.id === data.id) {
+              return data
+            }
+            return d
+          })
+        })
       },
     }
   )
