@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 //
 
 import { Wrapper, Main } from './components/styled'
+import GlobalLoader from './components/GlobalLoader'
 import Sidebar from './components/Sidebar'
 
 import Admin from './screens/admin'
@@ -24,6 +25,7 @@ export default function App() {
     <SafeHydrate>
       <BrowserRouter>
         <Wrapper>
+          <GlobalLoader />
           <Sidebar />
           <Main>
             <Routes>
