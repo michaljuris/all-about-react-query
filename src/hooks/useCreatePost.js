@@ -5,8 +5,13 @@ export default function useCreatePost() {
   return useMutation(
     (values) => axios.post('/api/posts', values).then((res) => res.data),
     {
+      onMutate: (newPost) => {
+        if (queryCache.getQueryData('posts')) {
+          queryCache.setQueryData('posts', (old) => [...old, newPost])
+        }
+      },
       onSuccess: () => {
-        queryCache.invalidateQueries(['posts'])
+        queryCache.invalidateQueries('posts')
       },
     }
   )
