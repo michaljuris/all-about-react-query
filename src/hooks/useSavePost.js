@@ -7,8 +7,10 @@ export default function useSavePost() {
       axios.patch(`/api/posts/${values.id}`, values).then((res) => res.data),
     {
       onMutate: (newPost) => {
-        queryCache.setQueryData(['posts', newPost.id], newPost)
+        const oldPostsSnapshot = queryCache.getQueryData('posts')
+        const oldPostSnapshot = queryCache.getQueryData(['posts', newPost.id])
 
+        queryCache.setQueryData(['posts', newPost.id], newPost)
         queryCache.setQueryData('posts', (old) => {
           if (!old) {
             return old
@@ -20,6 +22,17 @@ export default function useSavePost() {
             return d
           })
         })
+
+        return () => {
+          queryCache.setQueryData(['posts', newPost.id], oldPostSnapshot)
+          queryCache.setQueryData('posts', oldPostsSnapshot)
+        }
+      },
+      onError: (error, newPost, rollback) => {
+        if (rollback) rollback()
+
+        queryCache.invalidateQueries(['posts', newPost.id])
+        queryCache.invalidateQueries('posts')
       },
       onSuccess: (data, values) => {
         queryCache.invalidateQueries(['posts', data.id])
