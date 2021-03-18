@@ -1,4 +1,4 @@
-### Update to react-query v3
+### *Update: Code updated for react-query v3*
 
 ## What is this?
 
