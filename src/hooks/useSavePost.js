@@ -1,17 +1,19 @@
 import axios from 'axios'
-import { queryCache, useMutation } from 'react-query'
+import { queryCache, useMutation, useQueryClient } from 'react-query'
 
 export default function useSavePost() {
-  return useMutation(
+  const queryClient = useQueryClient()
+
+  const { mutate, ...rest } = useMutation(
     (values) =>
       axios.patch(`/api/posts/${values.id}`, values).then((res) => res.data),
     {
       onMutate: (newPost) => {
-        const oldPostsSnapshot = queryCache.getQueryData('posts')
-        const oldPostSnapshot = queryCache.getQueryData(['posts', newPost.id])
+        const oldPostsSnapshot = queryClient.getQueryData('posts')
+        const oldPostSnapshot = queryClient.getQueryData(['posts', newPost.id])
 
-        queryCache.setQueryData(['posts', newPost.id], newPost)
-        queryCache.setQueryData('posts', (old) => {
+        queryClient.setQueryData(['posts', newPost.id], newPost)
+        queryClient.setQueryData('posts', (old) => {
           if (!old) {
             return old
           }
@@ -24,20 +26,22 @@ export default function useSavePost() {
         })
 
         return () => {
-          queryCache.setQueryData(['posts', newPost.id], oldPostSnapshot)
-          queryCache.setQueryData('posts', oldPostsSnapshot)
+          queryClient.setQueryData(['posts', newPost.id], oldPostSnapshot)
+          queryClient.setQueryData('posts', oldPostsSnapshot)
         }
       },
       onError: (error, newPost, rollback) => {
         if (rollback) rollback()
 
-        queryCache.invalidateQueries(['posts', newPost.id])
-        queryCache.invalidateQueries('posts')
+        queryClient.invalidateQueries(['posts', newPost.id])
+        queryClient.invalidateQueries('posts')
       },
       onSuccess: (data, values) => {
-        queryCache.invalidateQueries(['posts', data.id])
-        queryCache.invalidateQueries('posts')
+        queryClient.invalidateQueries(['posts', data.id])
+        queryClient.invalidateQueries('posts')
       },
     }
   )
+
+  return [mutate, rest]
 }
