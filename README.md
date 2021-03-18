@@ -1,3 +1,5 @@
+### Update to react-query v3
+
 ## What is this?
 
 It's an example repo I used to teach a workshop about React Query!
